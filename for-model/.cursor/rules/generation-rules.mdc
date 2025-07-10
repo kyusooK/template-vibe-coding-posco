@@ -1,0 +1,33 @@
+---
+alwaysApply: false
+---
+
+Generate the Spring Boot project according to the following requirements:
+
+Project Generation Workflow
+The project MUST be generated in the following sequential order as specified in the prompt:
+
+Package Structure Creation -> pom.xml Generation -> Store Module Files Creation -> Feature Module Files Creation -> Facade Module Files Creation -> Boot Module Files Creation -> Inter-module Dependencies Configuration -> Global Error Resolution
+
+Java File Generation Sequence
+When creating *.java files, generate code sequentially following the requirements below:
+
+1. Package and Import Section
+    - Package declaration
+    - All necessary import statements
+
+2. Class Declaration Section
+    - Required annotations for the file
+    - Class declaration with proper modifiers
+
+3. Field and Method Section
+    - Field declarations or method implementations according to each file's responsibility
+
+Mandatory Response Protocol:
+If errors occur during file generation, continue with the project generation workflow sequence and resolve all errors only after the complete project structure is established.
+
+Project Generation Guidelines
+1. Project generation MUST be based on the metadata derived from the requested PRD and Rule files.
+2. Package structure MUST be created based on `@package-structure.md` specifications.
+3. Root and module-level pom.xml files MUST be generated according to `@pom-generation-rules`.
+4. All files MUST be generated strictly based on metadata, and MUST NOT include any data not specified in the metadata.

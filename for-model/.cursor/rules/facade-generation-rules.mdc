@@ -1,0 +1,305 @@
+---
+description: "@/{service name}-facade 모듈 코드 생성 규칙 - REST API 및 인터페이스 계층"
+globs: ["**/**-facade/**"]
+alwaysApply: false
+---
+
+# Facade Generation Rules - {service name}-facade 모듈
+
+## 패키지 구조
+
+```
+{service name}-facade/
+├── pom.xml                                    # Maven 프로젝트 설정 (고정 생성)
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── poscodx/
+│   │   │           └── sample/
+│   │   │               └── {service name}/
+│   │   │                   └── facade/
+│   │   │                       ├── event/           # 이벤트 처리 (유동 생성)
+│   │   │                       └── rest/
+│   │   │                           ├── exception/   # 예외 처리 (고정 생성)
+│   │   │                           │   └── {ServiceName}ExceptionHandler.java
+│   │   │                           ├── feature/     # Feature REST 컨트롤러 (유동 생성)
+│   │   │                           │   ├── {entityName}ActionResource.java
+│   │   │                           │   └── {entityName}FlowResource.java
+│   │   │                           └── store/       # Store CRUD REST 컨트롤러 (유동 생성)
+│   │   │                               └── {entityName}Resource.java
+│   │   └── resources/
+
+```
+
+## 고정 생성 파일들
+
+### 1. pom.xml
+Maven 프로젝트 설정 파일로, `@pom-generation-rules`를 참고하여 의존성과 빌드 설정이 정의되어 있습니다.
+
+### 2. {ServiceName}ExceptionHandler.java
+전역 예외 처리를 담당하는 컨트롤러 어드바이스 클래스입니다.
+
+```java
+package com.poscodx.sample.msaez0.facade.rest.exception;
+
+import com.poscodx.base.share.domain.errorobjects.PosBaseException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+/**
+ * Auto generated class
+ * 
+ * 자동생성 프로그램 버전 : 1.0.0
+ * 생성일시 :  {현재날짜시간}
+ * @FileName : 클래스에 대한 한글 명칭
+ * Change history
+ * @수정날짜;SCR_NO;수정자;수정내용
+ * @{현재날짜시간};00000;홍길동;최초생성
+ * 
+ */
+@Slf4j
+@ControllerAdvice
+public class {ServiceName}ExceptionHandler {
+
+    private void logException(Exception e) {
+        log.error(e.getMessage(), e);
+    }
+
+    @ExceptionHandler(PosBaseException.class)
+    public ResponseEntity<String> handlePosBaseException(PosBaseException exception) {
+        log.debug("=====handlePosBaseException=====");
+        this.logException(exception);
+        ResponseEntity retVal = ResponseEntity.status(exception.getCode()).body(exception.getMessage());
+        return retVal;
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException exception) {
+        log.debug("=====handleRuntimeException=====");
+        this.logException(exception);
+        PosBaseException e = new PosBaseException(exception);
+        ResponseEntity retVal = ResponseEntity.status(e.getCode()).body(e.getMessage());
+        return retVal;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception exception) {
+        log.debug("=====handleException=====");
+        this.logException(exception);
+        PosBaseException e = new PosBaseException(exception);
+        ResponseEntity retVal = ResponseEntity.status(e.getCode()).body(e.getMessage());
+        return retVal;
+    }
+}
+```
+
+## 유동 생성 파일들 규칙
+
+DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생성될 파일들이며, 해당 메타데이터를 참고하여 유동적으로 세부 코드, 경로가 변경되어야한다.
+
+### 1. {entityName}Resource.java (Store CRUD 컨트롤러)
+도메인 엔티티에 대한 기본 CRUD REST API를 제공하는 컨트롤러입니다.
+
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{프로젝트명}.facade.rest.store`
+- 클래스명: `{entityName}Resource` (첫 글자 대문자)
+- REST 매핑: `/{entity-name}` (kebab-case)
+- 기본 CRUD 메서드: findAll, find, register, modify, remove
+
+**예시 코드:**
+```java
+package com.poscodx.sample.msaez0.facade.rest.store;
+
+import java.util.List;
+import com.poscodx.base.share.domain.NameValueList;
+import com.poscodx.sample.msaez0.store.domain.entity.project;
+import com.poscodx.sample.msaez0.store.domain.logic.projectLogic;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Auto generated class
+ * 
+ * 자동생성 프로그램 버전 : 1.0.0
+ * 생성일시 :  {현재날짜시간}
+ * @FileName : 클래스에 대한 한글 명칭
+ * Change history
+ * @수정날짜;SCR_NO;수정자;수정내용
+ * @{현재날짜시간};00000;홍길동;최초생성
+ * 
+ */
+@Slf4j
+@RequiredArgsConstructor
+@CrossOrigin("*")
+@RestController
+@RequestMapping(path = "/project")
+public class projectResource {
+    private final projectLogic logic;
+
+    @GetMapping(path = "/all")
+    public List<project> findAll() {
+        return this.logic.findAll();
+    }
+
+    @GetMapping(path = "/{id}")
+    public project find(@PathVariable("id") Integer id) {
+        return this.logic.find(id);
+    }
+
+    @PostMapping
+    public project register(@org.springframework.web.bind.annotation.RequestBody project entity) {
+        return this.logic.register(entity);
+    }
+
+    @PutMapping(path = "/{id}")
+    public project modify(@PathVariable("id") Integer id, @org.springframework.web.bind.annotation.RequestBody NameValueList nameValues) {
+        return this.logic.modify(id, nameValues);
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public void remove(@PathVariable("id") Integer id) {
+        this.logic.remove(id);
+    }
+}
+```
+
+### 2. {entityName}ActionResource.java (Feature Action 컨트롤러)
+비즈니스 액션을 처리하는 REST API 컨트롤러입니다.
+
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{프로젝트명}.facade.rest.feature`
+- 클래스명: `{entityName}ActionResource` (첫 글자 대문자)
+- REST 매핑: `/{entity-name}-action` (kebab-case)
+- Action 컴포넌트 의존성 주입
+
+**예시 코드:**
+```java
+package com.poscodx.sample.msaez0.facade.rest.feature;
+
+import com.poscodx.sample.msaez0.feature.action.projectAction;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Auto generated class
+ * 
+ * 자동생성 프로그램 버전 : 1.0.0
+ * 생성일시 :  {현재날짜시간}
+ * @FileName : 클래스에 대한 한글 명칭
+ * Change history
+ * @수정날짜;SCR_NO;수정자;수정내용
+ * @{현재날짜시간};00000;홍길동;최초생성
+ * 
+ */
+@Slf4j
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(path = "/project-action")
+public class projectActionResource {
+    private final projectAction action;
+    
+    /* 
+    // TODO : Biz Logic 구현 
+    // 1. 필요한 컴포넌트 선언 
+    private final SomeComponent someComponent; 
+    private final SomeLogic someLogic; 
+    private final SomeAction someAction; 
+    private final SomeFlow someFlow; 
+
+    // 2. 필요한 메소드 정의 및 구현 
+    public void someMethod() { 
+        someComponent.someMethod(); 
+        someLogic.someMethod(); 
+        someAction.someMethod(); 
+        someFlow.someMethod(); 
+        flow.someMethod(); 
+    } 
+    public String someMessageTest(Locale locale, String ... args) { 
+        return messageSource.getMessage("SOME_MESSAGE_ID", args, locale);
+    } 
+    */ 
+}
+```
+
+### 3. {entityName}FlowResource.java (Feature Flow 컨트롤러)
+비즈니스 플로우를 처리하는 REST API 컨트롤러입니다.
+
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{프로젝트명}.facade.rest.feature`
+- 클래스명: `{entityName}FlowResource` (첫 글자 대문자)
+- REST 매핑: `/{entity-name}-flow` (kebab-case)
+- Flow 컴포넌트 의존성 주입
+
+**예시 코드:**
+```java
+package com.poscodx.sample.msaez0.facade.rest.feature;
+
+import com.poscodx.sample.msaez0.feature.flow.projectFlow;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Auto generated class
+ * 
+ * 자동생성 프로그램 버전 : 1.0.0
+ * 생성일시 :  {현재날짜시간}
+ * @FileName : 클래스에 대한 한글 명칭
+ * Change history
+ * @수정날짜;SCR_NO;수정자;수정내용
+ * @{현재날짜시간};00000;홍길동;최초생성
+ * 
+ */
+@Slf4j
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(path = "/project-flow")
+public class projectFlowResource {
+    private final projectFlow flow;
+    
+    /* 
+    // TODO : Biz Logic 구현 
+    // 1. 필요한 컴포넌트 선언 
+    private final SomeComponent someComponent; 
+    private final SomeLogic someLogic; 
+    private final SomeAction someAction; 
+    private final SomeFlow someFlow; 
+
+    // 2. 필요한 메소드 정의 및 구현 
+    public void someMethod() { 
+        someComponent.someMethod(); 
+        someLogic.someMethod(); 
+        someAction.someMethod(); 
+        someFlow.someMethod(); 
+        flow.someMethod(); 
+    } 
+    public String someMessageTest(Locale locale, String ... args) { 
+        return messageSource.getMessage("SOME_MESSAGE_ID", args, locale);
+    } 
+    */ 
+}
+```
+
+## 생성 지침
+
+1. **고정 생성 파일들**은 위에 명시된 내용을 기반으로 서비스명에 맞게 생성합니다.
+2. **유동 생성 파일들**은 도메인 엔티티 메타데이터를 기반으로 동적으로 생성합니다.
+3. 모든 Java 클래스에는 표준 헤더 주석(자동생성 정보, 생성일시, 변경이력)을 포함해야 합니다.
+4. REST 매핑 경로는 엔티티명을 kebab-case로 변환하여 사용합니다.
+5. CRUD 컨트롤러는 기본적인 5가지 메서드(findAll, find, register, modify, remove)를 포함합니다.
+6. Feature 컨트롤러는 해당하는 Action/Flow 컴포넌트에 의존하며, 비즈니스 로직 구현을 위한 TODO 주석을 포함합니다.
+7. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.

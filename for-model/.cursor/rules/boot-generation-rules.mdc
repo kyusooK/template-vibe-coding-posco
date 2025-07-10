@@ -1,0 +1,228 @@
+---
+description: "@/{service name}-boot 모듈 코드 생성 규칙 - Spring Boot 애플리케이션 부트스트랩 모듈"
+globs: ["**/**-boot/**"]
+alwaysApply: false
+---
+
+# Boot Generation Rules - {service name}-boot 모듈
+
+## 패키지 구조
+
+```
+{service name}-boot/
+├── pom.xml                                    # Maven 프로젝트 설정 (고정 생성)
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── poscodx/
+│   │   │           └── sample/
+│   │   │               └── {service name}/
+│   │   │                   ├── config/       # 설정 클래스들 (유동 생성)
+│   │   │                   │   └── GsonHttpMessageConverterConfiguration.java
+│   │   │                   └── SampleApplication.java  # 메인 애플리케이션 클래스 (유동 생성)
+│   │   └── resources/
+│   │       ├── bootstrap.yml                 # 부트스트랩 설정 (고정 생성)
+│   │       ├── log4j2-local.xml             # 로컬 로깅 설정 (고정 생성)
+│   │       └── log4j2-cloud.xml             # 클라우드 로깅 설정 (고정 생성)
+
+```
+
+## 고정 생성 파일들
+
+### 1. pom.xml
+Maven 프로젝트 설정 파일로, `@pom-generation-rules`를 참고하여 의존성과 빌드 설정이 정의되어 있습니다.
+
+### 2. bootstrap.yml
+Spring Cloud Config를 위한 부트스트랩 설정 파일입니다.
+
+```yaml
+spring:
+  cloud:
+    config:
+      uri: ${bootstrap-config.uri}
+  application:
+    name: {{options.package}}
+  profiles:
+    active: local
+bootstrap-config:
+  uri: http://pit01u-config:8080/pit01u-config
+```
+
+### 3. log4j2-local.xml
+로컬 환경용 Log4j2 설정 파일입니다.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>[%-5level] [%T] %d{yyyy-MM-dd HH:mm:ss.SSS} %c{1} - %msg%n</pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="CONSOLE"/>
+        </Root>
+        <Logger name="com.poscoict" level="TRACE" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="com.posco" level="TRACE" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+    </Loggers>
+</Configuration>
+```
+
+### 4. log4j2-cloud.xml
+클라우드 환경용 Log4j2 설정 파일입니다.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>[%-5level] [%T] %d{yyyy-MM-dd HH:mm:ss.SSS} |%X{x-traceId}|%X{x-spanId}|%X{x-transactionCodeOrViewId}|%c - %msg%n</pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="WARN">
+            <AppenderRef ref="CONSOLE"/>
+        </Root>
+        <Logger name="com.posco" level="DEBUG" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="com.poscoict" level="DEBUG" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="org.apache.kafka" level="INFO" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="org.springframework" level="INFO" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+    </Loggers>
+</Configuration>
+```
+
+
+
+## 유동 생성 파일들 규칙
+
+DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생성될 파일들이며, 해당 메타데이터를 참고하여 유동적으로 세부 코드, 경로가 변경되어야한다.
+
+### 1. SampleApplication.java
+메인 애플리케이션 클래스로, 프로젝트 메타데이터를 기반으로 생성됩니다.
+
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{프로젝트명}`
+- 클래스명: `{프로젝트명}Application` (첫 글자 대문자)
+- EntityScan 및 EnableJpaRepositories의 basePackages는 프로젝트 패키지 구조에 맞게 설정
+
+**예시 코드:**
+```java
+package com.poscodx.sample.msaez0;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Auto generated class
+ * 
+ * 자동생성 프로그램 버전 : 1.0.0
+ * 생성일시 :  2025-06-25 09:48:13.969
+ * @FileName : 클래스에 대한 한글 명칭
+ * Change history
+ * @수정날짜;SCR_NO;수정자;수정내용
+ * @2025-06-25 09:48:13.969;00000;홍길동;최초생성
+ * 
+ */
+@SpringBootApplication
+@EntityScan(basePackages = {
+    "com.poscodx.sample.msaez0",
+    "com.poscodx.reuse.common.util.kafka.db"
+})
+@EnableJpaRepositories(basePackages = {
+    "com.poscodx.sample.msaez0",
+    "com.poscodx.reuse.common.util.kafka.db"
+})
+@RestController
+public class SampleApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SampleApplication.class, args);
+    }
+
+    @GetMapping(path = "/health")
+    public String health() {
+        return "ok";
+    }
+}
+```
+
+### 2. GsonHttpMessageConverterConfiguration.java
+HTTP 메시지 컨버터 설정 클래스로, 프로젝트 메타데이터를 기반으로 생성됩니다.
+
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{프로젝트명}.config`
+- 클래스명: 고정 (`GsonHttpMessageConverterConfiguration`)
+- 표준 GSON 설정을 포함
+
+**예시 코드:**
+```java
+package com.poscodx.sample.msaez0.config;
+
+import java.util.List;
+import com.poscodx.base.share.util.json.JsonUtil;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/**
+ * Auto generated class
+ * 
+ * 자동생성 프로그램 버전 : 1.0.0
+ * 생성일시 :  2025-06-25 09:48:13.969
+ * @FileName : 클래스에 대한 한글 명칭
+ * Change history
+ * @수정날짜;SCR_NO;수정자;수정내용
+ * @2025-06-25 09:48:13.969;00000;홍길동;최초생성
+ * 
+ */
+@Configuration
+public class GsonHttpMessageConverterConfiguration
+    implements WebMvcConfigurer
+{
+
+    @Bean
+    public GsonHttpMessageConverter gsonHttpMessageConverter() {
+        GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
+        converter.setGson(JsonUtil.getGson());
+        return converter;
+    }
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(this.gsonHttpMessageConverter());
+        WebMvcConfigurer.super.configureMessageConverters(converters);
+    }
+}
+```
+
+## 생성 지침
+
+1. **고정 생성 파일들**은 위에 명시된 내용을 그대로 사용하여 생성합니다.
+2. **유동 생성 파일들**은 프로젝트 메타데이터(프로젝트명, 패키지명 등)를 기반으로 동적으로 생성합니다.
+3. 모든 Java 클래스에는 표준 헤더 주석(자동생성 정보, 생성일시, 변경이력)을 포함해야 합니다.
+4. EntityScan과 EnableJpaRepositories 설정은 프로젝트 구조에 맞게 조정합니다.
+5. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.
