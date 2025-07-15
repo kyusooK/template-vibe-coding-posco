@@ -92,7 +92,7 @@ function customStringify(obj, cache = new Set(), parentType = null, parentKey = 
 }
 
 // customStringify 함수 적용
-this.contexts.json = customStringify(this).replace;
+this.contexts.json = customStringify(this).replace(/"/g, '');
 
 window.$HandleBars.registerHelper('checkFE', function (bc) {
     if(bc.name == 'ui'){
