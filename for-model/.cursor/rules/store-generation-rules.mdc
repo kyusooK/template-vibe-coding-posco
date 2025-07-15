@@ -1,9 +1,7 @@
 ---
-description: "@/{service name}-store 모듈 코드 생성 규칙 - 데이터 저장소 및 영속성 계층"
-globs: ["**/**-store/**"]
+description: "store 모듈 코드를 생성할 때 패키지 구조, 고정 생성파일, 유동 생성파일을 구성하는데 참고하여 사용합니다."
 alwaysApply: false
 ---
-
 # Store Generation Rules - {service name}-store 모듈
 
 ## 패키지 구조
@@ -32,39 +30,12 @@ alwaysApply: false
 │   │   │                       │   └── {entityName}PostgresqlStore.java  # Store 구현체 (유동 생성)
 │   │   │                       └── {entityName}Store.java  # Store 인터페이스 (유동 생성)
 │   │   └── resources/
-│   └── test/
-│       ├── java/
-│       │   └── com/
-│       │       └── poscodx/
-│       │           └── sample/
-│       │               └── {service name}/
-│       │                   └── store/
-│       │                       └── {entityName}StoreTest.java  # 테스트 클래스 (유동 생성)
-│       └── resources/
-│           └── application.yml              # 테스트 설정 (고정 생성)
-
 ```
 
 ## 고정 생성 파일들
 
 ### 1. pom.xml
 Maven 프로젝트 설정 파일로, `@pom-generation-rules`를 참고하여 의존성과 빌드 설정이 정의되어 있습니다.
-
-### 2. application.yml (test)
-테스트용 애플리케이션 설정 파일입니다.
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
-```
 
 ## 유동 생성 파일들 규칙
 
@@ -81,7 +52,7 @@ DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.store.domain.entity;
+package com.poscodx.sample.{service name}.store.domain.entity;
 
 import java.sql.Timestamp;
 import com.poscodx.base.share.domain.PoscoEntity;
@@ -93,17 +64,19 @@ import lombok.Setter;
  * Auto generated class
  * 
  * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
+ * 생성일시 :  2025-06-25 09:50:25.681
  * @FileName : 클래스에 대한 한글 명칭
  * Change history
  * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
+ * @2025-06-25 09:50:25.681;00000;홍길동;최초생성
  * 
  */
 @Getter
 @Setter
 @NoArgsConstructor
-public class project extends PoscoEntity {
+public class project
+    extends PoscoEntity
+{
     private Integer id;
     private String pname;
     private String url;
@@ -133,29 +106,18 @@ public class project extends PoscoEntity {
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.store.domain.logic;
+package com.poscodx.sample.{service name}.store.domain.logic;
 
 import java.util.List;
 import com.poscodx.base.share.domain.NameValueList;
-import com.poscodx.sample.msaez0.store.domain.entity.project;
-import com.poscodx.sample.msaez0.store.projectStore;
+import com.poscodx.sample.{service name}.store.domain.entity.project;
+import com.poscodx.sample.{service name}.store.projectStore;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
@@ -199,22 +161,11 @@ public class projectLogic {
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.store;
+package com.poscodx.sample.{service name}.store;
 
 import java.util.List;
-import com.poscodx.sample.msaez0.store.domain.entity.project;
+import com.poscodx.sample.{service name}.store.domain.entity.project;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 public interface projectStore {
 
     List<project> retrieveAll();
@@ -241,14 +192,14 @@ PostgreSQL을 사용한 Store 인터페이스 구현체입니다.
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.store.postgresql;
+package com.poscodx.sample.{service name}.store.postgresql;
 
 import java.util.List;
 import java.util.Optional;
-import com.poscodx.sample.msaez0.store.domain.entity.project;
-import com.poscodx.sample.msaez0.store.postgresql.jpo.projectJpo;
-import com.poscodx.sample.msaez0.store.postgresql.repository.projectPostgresqlRepository;
-import com.poscodx.sample.msaez0.store.projectStore;
+import com.poscodx.sample.{service name}.store.domain.entity.project;
+import com.poscodx.sample.{service name}.store.postgresql.jpo.projectJpo;
+import com.poscodx.sample.{service name}.store.postgresql.repository.projectPostgresqlRepository;
+import com.poscodx.sample.{service name}.store.projectStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -257,17 +208,19 @@ import org.springframework.stereotype.Repository;
  * Auto generated class
  * 
  * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
+ * 생성일시 :  2025-06-25 09:50:25.681
  * @FileName : 클래스에 대한 한글 명칭
  * Change history
  * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
+ * @2025-06-25 09:50:25.681;00000;홍길동;최초생성
  * 
  */
 @Slf4j
 @RequiredArgsConstructor
 @Repository
-public class projectPostgresqlStore implements projectStore {
+public class projectPostgresqlStore
+    implements projectStore
+{
     private final projectPostgresqlRepository repository;
 
     @Override
@@ -318,7 +271,7 @@ public class projectPostgresqlStore implements projectStore {
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.store.postgresql.jpo;
+package com.poscodx.sample.{service name}.store.postgresql.jpo;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -326,7 +279,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import com.poscodx.base.share.exception.PoscoException;
 import com.poscodx.base.share.jpo.PoscoEntityJpo;
-import com.poscodx.sample.msaez0.store.domain.entity.project;
+import com.poscodx.sample.{service name}.store.domain.entity.project;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -336,23 +289,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity(name = "projectJpo")
 @Table(name = "project", schema = "public")
-public class projectJpo extends PoscoEntityJpo {
+public class projectJpo
+    extends PoscoEntityJpo
+{
     @Id
     @Column(name = "id")
     private Integer id;
@@ -390,7 +334,9 @@ public class projectJpo extends PoscoEntityJpo {
     }
 
     @Override
-    public void validateJpo() throws PoscoException {
+    public void validateJpo()
+        throws PoscoException
+    {
     }
 
     public project toDomain() {
@@ -400,9 +346,7 @@ public class projectJpo extends PoscoEntityJpo {
     }
 
     public static List<project> toDomains(Iterable<projectJpo> jpos) {
-        return StreamSupport.stream(jpos.spliterator(), false)
-                .map(projectJpo::toDomain)
-                .collect(Collectors.toList());
+        return StreamSupport.stream(jpos.spliterator(), false).map((projectJpo::toDomain)).collect(Collectors.toList());
     }
 }
 ```
@@ -418,23 +362,14 @@ Spring Data JPA Repository 인터페이스입니다.
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.store.postgresql.repository;
+package com.poscodx.sample.{service name}.store.postgresql.repository;
 
-import com.poscodx.sample.msaez0.store.postgresql.jpo.projectJpo;
+import com.poscodx.sample.{service name}.store.postgresql.jpo.projectJpo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
-public interface projectPostgresqlRepository extends JpaRepository<projectJpo, Integer> {
+public interface projectPostgresqlRepository
+    extends JpaRepository<projectJpo, Integer>
+{
 }
 ```
 
@@ -442,7 +377,7 @@ public interface projectPostgresqlRepository extends JpaRepository<projectJpo, I
 
 1. **고정 생성 파일들**은 위에 명시된 내용을 기반으로 서비스명에 맞게 생성합니다.
 2. **유동 생성 파일들**은 도메인 엔티티 메타데이터를 기반으로 동적으로 생성합니다.
-3. 모든 Java 클래스에는 표준 헤더 주석(자동생성 정보, 생성일시, 변경이력)을 포함해야 합니다.
+3. **패키지 구조**는 `com.poscodx.sample.{service name}` 형태로 통일합니다.
 4. Entity는 도메인 모델을, Jpo는 데이터베이스 매핑을 담당하며 서로 변환 메서드를 제공합니다.
 5. Logic 클래스는 비즈니스 로직을, Store는 데이터 접근을 추상화합니다.
 6. PostgreSQL 구현체는 JPA Repository를 사용하여 실제 데이터베이스 작업을 수행합니다.

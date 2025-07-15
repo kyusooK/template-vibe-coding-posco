@@ -1,9 +1,7 @@
 ---
-description: "@/{service name}-feature 모듈 코드 생성 규칙 - 비즈니스 로직 및 도메인 서비스 계층"
-globs: ["**/**-feature/**"]
+description: "feature 모듈 코드를 생성할 때 패키지 구조, 고정 생성파일, 유동 생성파일을 구성하는데 참고하여 사용합니다."
 alwaysApply: false
 ---
-
 # Feature Generation Rules - {service name}-feature 모듈
 
 ## 패키지 구조
@@ -25,7 +23,6 @@ alwaysApply: false
 │   │   │                       └── flow/           # 비즈니스 플로우 (유동 생성)
 │   │   │                           └── {entityName}Flow.java
 │   │   └── resources/
-
 ```
 
 ## 고정 생성 파일들
@@ -48,26 +45,15 @@ DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.feature.action;
+package com.poscodx.sample.{service name}.feature.action;
 
-import com.poscodx.sample.msaez0.store.domain.logic.projectLogic;
+import com.poscodx.sample.{service name}.store.domain.logic.projectLogic;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -106,26 +92,15 @@ public class projectAction {
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.feature.flow;
+package com.poscodx.sample.{service name}.feature.flow;
 
-import com.poscodx.sample.msaez0.feature.action.projectAction;
+import com.poscodx.sample.{service name}.feature.action.projectAction;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -159,7 +134,7 @@ public class projectFlow {
 
 1. **고정 생성 파일들**은 위에 명시된 내용을 기반으로 서비스명에 맞게 생성합니다.
 2. **유동 생성 파일들**은 도메인 엔티티 메타데이터를 기반으로 동적으로 생성합니다.
-3. 모든 Java 클래스에는 표준 헤더 주석(자동생성 정보, 생성일시, 변경이력)을 포함해야 합니다.
+3. **패키지 구조**는 `com.poscodx.sample.{service name}` 형태로 통일합니다.
 4. 모든 서비스 클래스는 `@Service`와 `@Transactional` 어노테이션을 포함해야 합니다.
 5. Action 클래스는 단일 비즈니스 로직 처리에 집중하고, Flow 클래스는 여러 Action을 조합한 복합 로직을 처리합니다.
 6. 의존성 주입은 생성자 주입 방식(`@RequiredArgsConstructor`)을 사용합니다.

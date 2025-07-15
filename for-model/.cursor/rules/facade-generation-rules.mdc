@@ -1,9 +1,7 @@
 ---
-description: "@/{service name}-facade 모듈 코드 생성 규칙 - REST API 및 인터페이스 계층"
-globs: ["**/**-facade/**"]
+description: "facade 모듈 코드를 생성할 때 패키지 구조, 고정 생성파일, 유동 생성파일을 구성하는데 참고하여 사용합니다."
 alwaysApply: false
 ---
-
 # Facade Generation Rules - {service name}-facade 모듈
 
 ## 패키지 구조
@@ -20,9 +18,11 @@ alwaysApply: false
 │   │   │               └── {service name}/
 │   │   │                   └── facade/
 │   │   │                       ├── event/           # 이벤트 처리 (유동 생성)
+│   │   │                       │   ├── TimeEventListener.java
+│   │   │                       │   └── topic_channelListener.java
 │   │   │                       └── rest/
 │   │   │                           ├── exception/   # 예외 처리 (고정 생성)
-│   │   │                           │   └── {ServiceName}ExceptionHandler.java
+│   │   │                           │   └── KafkaExceptionHandler.java
 │   │   │                           ├── feature/     # Feature REST 컨트롤러 (유동 생성)
 │   │   │                           │   ├── {entityName}ActionResource.java
 │   │   │                           │   └── {entityName}FlowResource.java
@@ -37,11 +37,15 @@ alwaysApply: false
 ### 1. pom.xml
 Maven 프로젝트 설정 파일로, `@pom-generation-rules`를 참고하여 의존성과 빌드 설정이 정의되어 있습니다.
 
-### 2. {ServiceName}ExceptionHandler.java
+### 2. KafkaExceptionHandler.java
 전역 예외 처리를 담당하는 컨트롤러 어드바이스 클래스입니다.
 
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{서비스명}.facade.rest.exception`
+- 클래스명: `KafkaExceptionHandler` (고정)
+
 ```java
-package com.poscodx.sample.msaez0.facade.rest.exception;
+package com.poscodx.sample.{service name}.facade.rest.exception;
 
 import com.poscodx.base.share.domain.errorobjects.PosBaseException;
 import lombok.extern.slf4j.Slf4j;
@@ -49,20 +53,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 @Slf4j
 @ControllerAdvice
-public class {ServiceName}ExceptionHandler {
+public class KafkaExceptionHandler {
 
     private void logException(Exception e) {
         log.error(e.getMessage(), e);
@@ -96,6 +89,80 @@ public class {ServiceName}ExceptionHandler {
 }
 ```
 
+### 3. TimeEventListener.java
+시간 기반 이벤트를 처리하는 리스너 클래스입니다.
+
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{서비스명}.facade.event`
+- 클래스명: `TimeEventListener` (고정)
+
+```java
+package com.poscodx.sample.{service name}.facade.event;
+
+import java.util.function.Consumer;
+import com.poscodx.reuse.common.util.kafka.annotation.PosEventHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.Message;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component("timeevent")
+public class TimeEventListener
+    implements Consumer<Message<String>>
+{
+
+    @PosEventHandler
+    @Override
+    public void accept(Message<String> message) {
+        String payload = message.getPayload();
+        // TODO
+        // T obj = JsonUtil.fromJson(payload, T)
+        // someFlow.someMethod(obj)
+    }
+    
+    // TODO 
+    // private final SomeFlow someFlow; 
+
+}
+```
+
+### 4. topic_channelListener.java
+토픽 채널 이벤트를 처리하는 리스너 클래스입니다.
+
+**생성 규칙:**
+- 패키지명: `com.poscodx.sample.{서비스명}.facade.event`
+- 클래스명: `topic_channelListener` (고정)
+
+```java
+package com.poscodx.sample.{service name}.facade.event;
+
+import java.util.function.Consumer;
+import com.poscodx.reuse.common.util.kafka.annotation.PosEventHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.Message;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component("topic_channel")
+public class topic_channelListener
+    implements Consumer<Message<String>>
+{
+
+    @PosEventHandler
+    @Override
+    public void accept(Message<String> message) {
+        String payload = message.getPayload();
+        // TODO
+        // T obj = JsonUtil.fromJson(payload, T)
+        // someFlow.someMethod(obj)
+    }
+    
+    // TODO 
+    // private final SomeFlow someFlow; 
+
+}
+```
+
 ## 유동 생성 파일들 규칙
 
 DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생성될 파일들이며, 해당 메타데이터를 참고하여 유동적으로 세부 코드, 경로가 변경되어야한다.
@@ -111,12 +178,12 @@ DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.facade.rest.store;
+package com.poscodx.sample.{service name}.facade.rest.store;
 
 import java.util.List;
 import com.poscodx.base.share.domain.NameValueList;
-import com.poscodx.sample.msaez0.store.domain.entity.project;
-import com.poscodx.sample.msaez0.store.domain.logic.projectLogic;
+import com.poscodx.sample.{service name}.store.domain.entity.project;
+import com.poscodx.sample.{service name}.store.domain.logic.projectLogic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -128,17 +195,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 @Slf4j
 @RequiredArgsConstructor
 @CrossOrigin("*")
@@ -185,25 +241,14 @@ public class projectResource {
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.facade.rest.feature;
+package com.poscodx.sample.{service name}.facade.rest.feature;
 
-import com.poscodx.sample.msaez0.feature.action.projectAction;
+import com.poscodx.sample.{service name}.feature.action.projectAction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -245,25 +290,15 @@ public class projectActionResource {
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.facade.rest.feature;
+package com.poscodx.sample.{service name}.facade.rest.feature;
 
-import com.poscodx.sample.msaez0.feature.flow.projectFlow;
+import com.poscodx.sample.{service name}.feature.flow.projectFlow;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  {현재날짜시간}
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @{현재날짜시간};00000;홍길동;최초생성
- * 
- */
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -298,8 +333,12 @@ public class projectFlowResource {
 
 1. **고정 생성 파일들**은 위에 명시된 내용을 기반으로 서비스명에 맞게 생성합니다.
 2. **유동 생성 파일들**은 도메인 엔티티 메타데이터를 기반으로 동적으로 생성합니다.
-3. 모든 Java 클래스에는 표준 헤더 주석(자동생성 정보, 생성일시, 변경이력)을 포함해야 합니다.
-4. REST 매핑 경로는 엔티티명을 kebab-case로 변환하여 사용합니다.
-5. CRUD 컨트롤러는 기본적인 5가지 메서드(findAll, find, register, modify, remove)를 포함합니다.
-6. Feature 컨트롤러는 해당하는 Action/Flow 컴포넌트에 의존하며, 비즈니스 로직 구현을 위한 TODO 주석을 포함합니다.
-7. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.
+3. **패키지 구조**는 `com.poscodx.sample.{service name}` 형태로 통일합니다.
+4. **Exception Handler**는 `KafkaExceptionHandler`로 고정합니다.
+5. **Event 리스너**는 Kafka 관련 이벤트 처리를 위해 고정 생성합니다:
+   - TimeEventListener.java
+   - topic_channelListener.java
+6. REST 매핑 경로는 엔티티명을 kebab-case로 변환하여 사용합니다.
+7. CRUD 컨트롤러는 기본적인 5가지 메서드(findAll, find, register, modify, remove)를 포함합니다.
+8. Feature 컨트롤러는 해당하는 Action/Flow 컴포넌트에 의존하며, 비즈니스 로직 구현을 위한 TODO 주석을 포함합니다.
+9. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.

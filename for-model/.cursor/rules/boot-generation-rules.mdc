@@ -1,9 +1,7 @@
 ---
-description: "@/{service name}-boot 모듈 코드 생성 규칙 - Spring Boot 애플리케이션 부트스트랩 모듈"
-globs: ["**/**-boot/**"]
+description: "boot 모듈 코드를 생성할 때 패키지 구조, 고정 생성파일, 유동 생성파일을 구성하는데 참고하여 사용합니다."
 alwaysApply: false
 ---
-
 # Boot Generation Rules - {service name}-boot 모듈
 
 ## 패키지 구조
@@ -16,12 +14,15 @@ alwaysApply: false
 │   │   ├── java/
 │   │   │   └── com/
 │   │   │       └── poscodx/
-│   │   │           └── sample/
+│   │   │           └── kafka/
 │   │   │               └── {service name}/
 │   │   │                   ├── config/       # 설정 클래스들 (유동 생성)
 │   │   │                   │   └── GsonHttpMessageConverterConfiguration.java
-│   │   │                   └── SampleApplication.java  # 메인 애플리케이션 클래스 (유동 생성)
+│   │   │                   └── KafkaApplication.java  # 메인 애플리케이션 클래스 (유동 생성)
 │   │   └── resources/
+│   │       ├── application.yml               # 기본 애플리케이션 설정 (고정 생성)
+│   │       ├── application-local.yml         # 로컬 환경 설정 (고정 생성)
+│   │       ├── application-dev.yml           # 개발 환경 설정 (고정 생성)
 │   │       ├── bootstrap.yml                 # 부트스트랩 설정 (고정 생성)
 │   │       ├── log4j2-local.xml             # 로컬 로깅 설정 (고정 생성)
 │   │       └── log4j2-cloud.xml             # 클라우드 로깅 설정 (고정 생성)
@@ -33,7 +34,96 @@ alwaysApply: false
 ### 1. pom.xml
 Maven 프로젝트 설정 파일로, `@pom-generation-rules`를 참고하여 의존성과 빌드 설정이 정의되어 있습니다.
 
-### 2. bootstrap.yml
+### 2. application.yml
+Spring Boot 기본 애플리케이션 설정 파일입니다.
+
+```yaml
+server:
+  servlet:
+    context-path: /{service name}-kafka
+spring:
+  datasource:
+    url: ${datasource.url}
+    username: ${datasource.username}
+    password: ${datasource.password}
+    driver-class-name: ${datasource.driver-class-name}
+    hikari:
+      maximum-pool-size: ${datasource.hikari.maximum-pool-size}
+      minimum-idle: ${datasource.hikari.minimum-idle}
+  mvc:
+    converters:
+      preferred-json-mapper: gson
+  cloud:
+    stream:
+      default:
+        group: ${spring.application.name}
+      kafka:
+        binder:
+          brokers: ${kafka.brokers}
+          zkNodes: ${kafka.zkNodes}
+        default:
+          consumer:
+            ackMode: RECORD
+      function:
+        definition: topic_channel
+      bindings:
+        default:
+          consumer:
+            enableDlq: true
+            maxAttempts: 2147483647
+        topic_channel-in-0:
+          destination: topicname
+          consumer:
+            maxAttempts: 1
+poscoict:
+  reuse:
+    offset-n-skip:
+      jdbcUrl: ${reuse.datasource.url}
+      username: ${reuse.datasource.username}
+      password: ${reuse.datasource.password}
+      driverClassName: ${datasource.driver-class-name}
+      hikari:
+        maximum-pool-size: ${datasource.hikari.maximum-pool-size}
+        minimum-idle: ${datasource.hikari.minimum-idle}
+```
+
+### 3. application-local.yml
+로컬 환경용 애플리케이션 설정 파일입니다.
+
+```yaml
+server:
+  port: 8088
+datasource:
+  url: jdbc:postgresql://10.125.2.121:5432/jiradb
+  username: jirauser
+  password: jira12#
+  driver-class-name: org.postgresql.Driver
+  hikari:
+    maximum-pool-size: 3
+    minimum-idle: 1
+logging:
+  config: classpath:log4j2-local.xml
+```
+
+### 4. application-dev.yml
+개발 환경용 애플리케이션 설정 파일입니다.
+
+```yaml
+server:
+  port: 8080
+datasource:
+  url: jdbc:postgresql://10.125.2.121:5432/jiradb
+  username: jirauser
+  password: jira12#
+  driver-class-name: org.postgresql.Driver
+  hikari:
+    maximum-pool-size: 10
+    minimum-idle: 1
+logging:
+  config: classpath:log4j2-cloud.xml
+```
+
+### 5. bootstrap.yml
 Spring Cloud Config를 위한 부트스트랩 설정 파일입니다.
 
 ```yaml
@@ -42,14 +132,14 @@ spring:
     config:
       uri: ${bootstrap-config.uri}
   application:
-    name: {{options.package}}
+    name: {service name}-kafka
   profiles:
     active: local
 bootstrap-config:
   uri: http://pit01u-config:8080/pit01u-config
 ```
 
-### 3. log4j2-local.xml
+### 6. log4j2-local.xml
 로컬 환경용 Log4j2 설정 파일입니다.
 
 ```xml
@@ -76,7 +166,7 @@ bootstrap-config:
 </Configuration>
 ```
 
-### 4. log4j2-cloud.xml
+### 7. log4j2-cloud.xml
 클라우드 환경용 Log4j2 설정 파일입니다.
 
 ```xml
@@ -109,19 +199,18 @@ bootstrap-config:
 </Configuration>
 ```
 
-
-
 ## 유동 생성 파일들 규칙
 
 DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생성될 파일들이며, 해당 메타데이터를 참고하여 유동적으로 세부 코드, 경로가 변경되어야한다.
 
-### 1. SampleApplication.java
+### 1. KafkaApplication.java
 메인 애플리케이션 클래스로, 프로젝트 메타데이터를 기반으로 생성됩니다.
 
 **생성 규칙:**
 - 패키지명: `com.poscodx.sample.{프로젝트명}`
-- 클래스명: `{프로젝트명}Application` (첫 글자 대문자)
+- 클래스명: `KafkaApplication` (고정)
 - EntityScan 및 EnableJpaRepositories의 basePackages는 프로젝트 패키지 구조에 맞게 설정
+- scanBasePackages에 kafka 관련 패키지 추가
 
 **예시 코드:**
 ```java
@@ -134,31 +223,23 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  2025-06-25 09:48:13.969
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @2025-06-25 09:48:13.969;00000;홍길동;최초생성
- * 
- */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+    "com.poscodx.sample.{service name}",
+    "com.poscodx.reuse.common.util.kafka"
+})
 @EntityScan(basePackages = {
-    "com.poscodx.sample.msaez0",
+    "com.poscodx.sample.{service name}",
     "com.poscodx.reuse.common.util.kafka.db"
 })
 @EnableJpaRepositories(basePackages = {
-    "com.poscodx.sample.msaez0",
+    "com.poscodx.sample.{service name}",
     "com.poscodx.reuse.common.util.kafka.db"
 })
 @RestController
-public class SampleApplication {
+public class KafkaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SampleApplication.class, args);
+        SpringApplication.run(KafkaApplication.class, args);
     }
 
     @GetMapping(path = "/health")
@@ -178,7 +259,7 @@ HTTP 메시지 컨버터 설정 클래스로, 프로젝트 메타데이터를 �
 
 **예시 코드:**
 ```java
-package com.poscodx.sample.msaez0.config;
+package com.poscodx.sample.{service name}.config;
 
 import java.util.List;
 import com.poscodx.base.share.util.json.JsonUtil;
@@ -188,17 +269,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Auto generated class
- * 
- * 자동생성 프로그램 버전 : 1.0.0
- * 생성일시 :  2025-06-25 09:48:13.969
- * @FileName : 클래스에 대한 한글 명칭
- * Change history
- * @수정날짜;SCR_NO;수정자;수정내용
- * @2025-06-25 09:48:13.969;00000;홍길동;최초생성
- * 
- */
 @Configuration
 public class GsonHttpMessageConverterConfiguration
     implements WebMvcConfigurer
@@ -220,9 +290,14 @@ public class GsonHttpMessageConverterConfiguration
 ```
 
 ## 생성 지침
-
 1. **고정 생성 파일들**은 위에 명시된 내용을 그대로 사용하여 생성합니다.
 2. **유동 생성 파일들**은 프로젝트 메타데이터(프로젝트명, 패키지명 등)를 기반으로 동적으로 생성합니다.
-3. 모든 Java 클래스에는 표준 헤더 주석(자동생성 정보, 생성일시, 변경이력)을 포함해야 합니다.
-4. EntityScan과 EnableJpaRepositories 설정은 프로젝트 구조에 맞게 조정합니다.
-5. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.
+3. **패키지 구조**는 `com.poscodx.sample.{service name}` 형태로 통일합니다.
+4. **애플리케이션 클래스명**은 `KafkaApplication`으로 고정합니다.
+5. **Kafka 관련 설정**을 포함하여 생성합니다:
+   - scanBasePackages에 kafka 관련 패키지 추가
+   - application.yml에 kafka stream 설정 포함
+6. EntityScan과 EnableJpaRepositories 설정은 프로젝트 구조에 맞게 조정합니다.
+7. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.
+8. **환경별 설정**: 로컬(local), 개발(dev) 환경에 따른 설정 파일들이 적절히 생성되어야 합니다.
+
