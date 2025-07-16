@@ -1,10 +1,15 @@
+forEach: Aggregate
+path: {{#boundedContext}}{{name}}{{/boundedContext}}/{{name}}
+---
+
 Please implement DDD-based microservice architecture code referring to `@generation-rules`. It must be generated based on the metadata provided below:
 
+{{#boundedContext}}serviceName: {{name}}{{/boundedContext}}
 {{{contexts.json}}}
 
 <function>
 var cache = []
-const includingKeys = ["", "_type", "fieldDescriptors", "aggregates", "className", "displayName", "events", "aggregateRoot", "policies", "incomingRelations", "source", "commands", "readModels", "queryOption", "queryParameters", "name", "type", "controllerInfo", "isRestRepository", "restRepositoryInfo", "apiPath", "method", "lifeCycles", "trigxger", "annotataion", "entities", "relations", "targetElement", "items"]
+const includingKeys = ["", "_type", "fieldDescriptors", "className", "displayName", "events", "aggregateRoot", "policies", "incomingRelations", "source", "commands", "readModels", "queryOption", "queryParameters", "name", "type", "controllerInfo", "isRestRepository", "restRepositoryInfo", "apiPath", "method", "lifeCycles", "trigxger", "annotataion", "entities", "relations", "targetElement", "items"]
 
 function customStringify(obj, cache = new Set(), parentType = null, parentKey = null, path = []) {
     if (obj === null || typeof obj !== 'object') {
