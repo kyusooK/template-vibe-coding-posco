@@ -4,7 +4,8 @@ path: {{#boundedContext}}{{name}}{{/boundedContext}}/{{name}}
 
 Please implement DDD-based microservice architecture code referring to `@generation-rules`. It must be generated based on the metadata provided below:
 
-{{#boundedContext}}serviceName: {{name}}{{/boundedContext}}
+DDD Model:
+{{#boundedContext}}serviceName: {{nameCamelCase}}{{/boundedContext}}
 {{{contexts.json}}}
 
 <function>

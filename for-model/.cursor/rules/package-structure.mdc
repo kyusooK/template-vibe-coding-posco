@@ -1,92 +1,20 @@
 ---
+
 alwaysApply: false
 ---
+
 Package Structure Requirements for Code Generation
 
 Please generate the following files according to the provided metadata, following the structure and file descriptions below.
 
+At this time, since code generation requests are made by Aggregate unit in DDD Model, if the package structure that should be configured for each service is already completed, this process should be skipped.
+
 ```
 /[serviceName] # Created by metadata name (ex: order, delivery, product ...)
   /[serviceName]-boot # Main Application Boot Module
-    /src
-      /main
-        /java/com/poscodx/sample/msaez0
-          /config
-            GsonHttpMessageConverterConfiguration.java # HTTP Message Converter Configuration
-          SampleApplication.java # Main Spring Boot Application Class
-        /resources
-          bootstrap.yml # Bootstrap configuration for cloud environment
-          log4j2-cloud.xml # Logging configuration for cloud environment
-          log4j2-local.xml # Logging configuration for local environment
-      /test
-        /java/com/poscodx/sample/msaez0
-          MessageResourceTest.java # Test for message resource functionality
-          SampleApplicationTest.java # Main application test
-        /resources
-          messages.properties # Default message properties
-          messages_en_US.properties # English message properties
-          messages_ko_KR.properties # Korean message properties
-    pom.xml # Maven configuration for boot module
-
   /[serviceName]-facade # REST API and External Interface Module
-    /src
-      /main
-        /java/com/poscodx/sample/msaez0/facade
-          /event # Event handling for external communication
-          /rest
-            /exception
-              SampleExceptionHandler.java # Global exception handler for REST APIs
-            /feature
-              projectActionResource.java # REST Controller for Project Action operations
-              projectFlowResource.java # REST Controller for Project Flow operations
-            /store
-              projectResource.java # REST Controller for Project CRUD operations
-        /resources
-      /test
-        /java
-        /resources
-    pom.xml # Maven configuration for facade module
-
   /[serviceName]-feature # Business Logic and Domain Feature Module
-    /src
-      /main
-        /java/com/poscodx/sample/msaez0/feature
-          /action
-            projectAction.java # Business action logic for Project Aggregate
-          /domain # Domain entities and business rules
-          /flow
-            projectFlow.java # Business flow orchestration for Project operations
-        /resources
-      /test
-        /java
-        /resources
-    pom.xml # Maven configuration for feature module
-
   /[serviceName]-store # Data Persistence and Repository Module
-    /src
-      /main
-        /java/com/poscodx/sample/msaez0/store
-          /domain
-            /entity
-              project.java # Project Aggregate Root Entity implementing DDD patterns
-            /logic
-              projectLogic.java # Business logic for Project domain operations
-          /postgresql
-            /jpo
-              projectJpo.java # JPA Entity for PostgreSQL persistence
-            /repository
-              projectPostgresqlRepository.java # JPA Repository interface for Project
-            projectPostgresqlStore.java # PostgreSQL implementation of Project store
-          projectStore.java # Abstract store interface for Project Aggregate
-        /resources
-      /test
-        /java/com/poscodx/sample/msaez0/store
-          projectStoreTest.java # Unit tests for Project store operations
-        /resources
-          application.yml # Test configuration for store module
-    pom.xml # Maven configuration for store module
-
   pom.xml # Root Maven multi-module configuration with poscodx-parent inheritance and 4 sub-modules (boot, facade, feature, store)
-
 ```
 

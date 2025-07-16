@@ -1,41 +1,47 @@
 ---
-description: "boot 모듈 코드를 생성할 때 패키지 구조, 고정 생성파일, 유동 생성파일을 구성하는데 참고하여 사용합니다."
+
+description: "Used as reference when generating boot module code for configuring package structure, fixed generation files, and dynamic generation files."
 alwaysApply: false
 ---
-# Boot Generation Rules - {service name}-boot 모듈
 
-## 패키지 구조
+# Boot Generation Rules - {service name}-boot module
 
-```
-{service name}-boot/
-├── pom.xml                                    # Maven 프로젝트 설정 (고정 생성)
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── poscodx/
-│   │   │           └── kafka/
-│   │   │               └── {service name}/
-│   │   │                   ├── config/       # 설정 클래스들 (유동 생성)
-│   │   │                   │   └── GsonHttpMessageConverterConfiguration.java
-│   │   │                   └── KafkaApplication.java  # 메인 애플리케이션 클래스 (유동 생성)
-│   │   └── resources/
-│   │       ├── application.yml               # 기본 애플리케이션 설정 (고정 생성)
-│   │       ├── application-local.yml         # 로컬 환경 설정 (고정 생성)
-│   │       ├── application-dev.yml           # 개발 환경 설정 (고정 생성)
-│   │       ├── bootstrap.yml                 # 부트스트랩 설정 (고정 생성)
-│   │       ├── log4j2-local.xml             # 로컬 로깅 설정 (고정 생성)
-│   │       └── log4j2-cloud.xml             # 클라우드 로깅 설정 (고정 생성)
+## Package Structure
+
+### Generation Rules
+Since code generation is requested by Aggregate unit in DDD Model, if the module structure has already been created, skip the package structure creation and proceed with generating files that should be created for each Aggregate unit.
 
 ```
+{service name}/
+└── {service name}-boot/
+    ├── pom.xml                                    # Maven project configuration (Fixed Generation)
+    ├── src/
+    │   ├── main/
+    │   │   ├── java/
+    │   │   │   └── com/
+    │   │   │       └── poscodx/
+    │   │   │           └── kafka/
+    │   │   │               └── {service name}/
+    │   │   │                   ├── config/       # Configuration classes (Dynamic Generation)
+    │   │   │                   │   └── GsonHttpMessageConverterConfiguration.java
+    │   │   │                   └── KafkaApplication.java  # Main application class (Dynamic Generation)
+    │   │   └── resources/
+    │   │       ├── application.yml               # Basic application configuration (Fixed Generation)
+    │   │       ├── application-local.yml         # Local environment configuration (Fixed Generation)
+    │   │       ├── application-dev.yml           # Development environment configuration (Fixed Generation)
+    │   │       ├── bootstrap.yml                 # Bootstrap configuration (Fixed Generation)
+    │   │       ├── log4j2-local.xml             # Local logging configuration (Fixed Generation)
+    │   │       └── log4j2-cloud.xml             # Cloud logging configuration (Fixed Generation)
 
-## 고정 생성 파일들
+```
+
+## Fixed Generation Files
 
 ### 1. pom.xml
-Maven 프로젝트 설정 파일로, `@pom-generation-rules`를 참고하여 의존성과 빌드 설정이 정의되어 있습니다.
+Maven project configuration file with dependencies and build settings defined by referencing `@pom-generation-rules`.
 
 ### 2. application.yml
-Spring Boot 기본 애플리케이션 설정 파일입니다.
+Spring Boot basic application configuration file.
 
 ```yaml
 server:
@@ -88,7 +94,7 @@ poscoict:
 ```
 
 ### 3. application-local.yml
-로컬 환경용 애플리케이션 설정 파일입니다.
+Application configuration file for local environment.
 
 ```yaml
 server:
@@ -106,7 +112,7 @@ logging:
 ```
 
 ### 4. application-dev.yml
-개발 환경용 애플리케이션 설정 파일입니다.
+Application configuration file for development environment.
 
 ```yaml
 server:
@@ -124,7 +130,7 @@ logging:
 ```
 
 ### 5. bootstrap.yml
-Spring Cloud Config를 위한 부트스트랩 설정 파일입니다.
+Bootstrap configuration file for Spring Cloud Config.
 
 ```yaml
 spring:
@@ -140,7 +146,7 @@ bootstrap-config:
 ```
 
 ### 6. log4j2-local.xml
-로컬 환경용 Log4j2 설정 파일입니다.
+Log4j2 configuration file for local environment.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -167,7 +173,7 @@ bootstrap-config:
 ```
 
 ### 7. log4j2-cloud.xml
-클라우드 환경용 Log4j2 설정 파일입니다.
+Log4j2 configuration file for cloud environment.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -199,20 +205,20 @@ bootstrap-config:
 </Configuration>
 ```
 
-## 유동 생성 파일들 규칙
+## Dynamic Generation Files Rules
 
-DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생성될 파일들이며, 해당 메타데이터를 참고하여 유동적으로 세부 코드, 경로가 변경되어야한다.
+Files to be generated for each Aggregate of boundedContext according to the nature of DDD microservices, and detailed code and paths should be changed dynamically by referencing the metadata.
 
 ### 1. KafkaApplication.java
-메인 애플리케이션 클래스로, 프로젝트 메타데이터를 기반으로 생성됩니다.
+Main application class generated based on project metadata.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{프로젝트명}`
-- 클래스명: `KafkaApplication` (고정)
-- EntityScan 및 EnableJpaRepositories의 basePackages는 프로젝트 패키지 구조에 맞게 설정
-- scanBasePackages에 kafka 관련 패키지 추가
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{project name}`
+- Class name: `KafkaApplication` (fixed)
+- EntityScan and EnableJpaRepositories basePackages are set according to project package structure
+- Add kafka-related packages to scanBasePackages
 
-**예시 코드:**
+**Example Code:**
 ```java
 package com.poscodx.sample.msaez0;
 
@@ -250,14 +256,14 @@ public class KafkaApplication {
 ```
 
 ### 2. GsonHttpMessageConverterConfiguration.java
-HTTP 메시지 컨버터 설정 클래스로, 프로젝트 메타데이터를 기반으로 생성됩니다.
+HTTP message converter configuration class generated based on project metadata.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{프로젝트명}.config`
-- 클래스명: 고정 (`GsonHttpMessageConverterConfiguration`)
-- 표준 GSON 설정을 포함
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{project name}.config`
+- Class name: Fixed (`GsonHttpMessageConverterConfiguration`)
+- Include standard GSON configuration
 
-**예시 코드:**
+**Example Code:**
 ```java
 package com.poscodx.sample.{service name}.config;
 
@@ -289,15 +295,15 @@ public class GsonHttpMessageConverterConfiguration
 }
 ```
 
-## 생성 지침
-1. **고정 생성 파일들**은 위에 명시된 내용을 그대로 사용하여 생성합니다.
-2. **유동 생성 파일들**은 프로젝트 메타데이터(프로젝트명, 패키지명 등)를 기반으로 동적으로 생성합니다.
-3. **패키지 구조**는 `com.poscodx.sample.{service name}` 형태로 통일합니다.
-4. **애플리케이션 클래스명**은 `KafkaApplication`으로 고정합니다.
-5. **Kafka 관련 설정**을 포함하여 생성합니다:
-   - scanBasePackages에 kafka 관련 패키지 추가
-   - application.yml에 kafka stream 설정 포함
-6. EntityScan과 EnableJpaRepositories 설정은 프로젝트 구조에 맞게 조정합니다.
-7. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.
-8. **환경별 설정**: 로컬(local), 개발(dev) 환경에 따른 설정 파일들이 적절히 생성되어야 합니다.
+## Generation Guidelines
+1. **Fixed generation files** are generated using the content specified above as is.
+2. **Dynamic generation files** are generated dynamically based on project metadata (project name, package name, etc.).
+3. **Package structure** is unified in the form of `com.poscodx.sample.{service name}`.
+4. **Application class name** is fixed as `KafkaApplication`.
+5. **Kafka-related configuration** is included in generation:
+   - Add kafka-related packages to scanBasePackages
+   - Include kafka stream configuration in application.yml
+6. EntityScan and EnableJpaRepositories settings are adjusted according to project structure.
+7. **DDD microservice-based changes**: File paths and detailed content should be created by referencing metadata for changes that need to be made based on DDD microservices.
+8. **Environment-specific configuration**: Configuration files for local and development (dev) environments should be appropriately generated.
 

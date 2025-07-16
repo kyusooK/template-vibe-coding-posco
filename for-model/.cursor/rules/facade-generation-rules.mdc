@@ -1,48 +1,54 @@
 ---
-description: "facade 모듈 코드를 생성할 때 패키지 구조, 고정 생성파일, 유동 생성파일을 구성하는데 참고하여 사용합니다."
+
+description: "Used as reference when generating facade module code for configuring package structure, fixed generation files, and dynamic generation files."
 alwaysApply: false
 ---
-# Facade Generation Rules - {service name}-facade 모듈
 
-## 패키지 구조
+# Facade Generation Rules - {service name}-facade module
 
-```
-{service name}-facade/
-├── pom.xml                                    # Maven 프로젝트 설정 (고정 생성)
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── poscodx/
-│   │   │           └── sample/
-│   │   │               └── {service name}/
-│   │   │                   └── facade/
-│   │   │                       ├── event/           # 이벤트 처리 (유동 생성)
-│   │   │                       │   ├── TimeEventListener.java
-│   │   │                       │   └── topic_channelListener.java
-│   │   │                       └── rest/
-│   │   │                           ├── exception/   # 예외 처리 (고정 생성)
-│   │   │                           │   └── KafkaExceptionHandler.java
-│   │   │                           ├── feature/     # Feature REST 컨트롤러 (유동 생성)
-│   │   │                           │   ├── {entityName}ActionResource.java
-│   │   │                           │   └── {entityName}FlowResource.java
-│   │   │                           └── store/       # Store CRUD REST 컨트롤러 (유동 생성)
-│   │   │                               └── {entityName}Resource.java
-│   │   └── resources/
+## Package Structure
+
+### Generation Rules
+Since code generation is requested by Aggregate unit in DDD Model, if the module structure has already been created, skip the package structure creation and proceed with generating files that should be created for each Aggregate unit.
 
 ```
+{service name}/
+└── {service name}-facade/
+    ├── pom.xml                                    # Maven project configuration (Fixed Generation)
+    ├── src/
+    │   ├── main/
+    │   │   ├── java/
+    │   │   │   └── com/
+    │   │   │       └── poscodx/
+    │   │   │           └── sample/
+    │   │   │               └── {service name}/
+    │   │   │                   └── facade/
+    │   │   │                       ├── event/           # Event handling (Dynamic Generation)
+    │   │   │                       │   ├── TimeEventListener.java
+    │   │   │                       │   └── topic_channelListener.java
+    │   │   │                       └── rest/
+    │   │   │                           ├── exception/   # Exception handling (Fixed Generation)
+    │   │   │                           │   └── KafkaExceptionHandler.java
+    │   │   │                           ├── feature/     # Feature REST controllers (Dynamic Generation)
+    │   │   │                           │   ├── {entityName}ActionResource.java
+    │   │   │                           │   └── {entityName}FlowResource.java
+    │   │   │                           └── store/       # Store CRUD REST controllers (Dynamic Generation)
+    │   │   │                               └── {entityName}Resource.java
+    │   │   └── resources/
 
-## 고정 생성 파일들
+```
+
+## Fixed Generation Files
 
 ### 1. pom.xml
-Maven 프로젝트 설정 파일로, `@pom-generation-rules`를 참고하여 의존성과 빌드 설정이 정의되어 있습니다.
+Maven project configuration file with dependencies and build settings defined by referencing `@pom-generation-rules`.
 
 ### 2. KafkaExceptionHandler.java
-전역 예외 처리를 담당하는 컨트롤러 어드바이스 클래스입니다.
+Controller advice class responsible for global exception handling.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{서비스명}.facade.rest.exception`
-- 클래스명: `KafkaExceptionHandler` (고정)
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{service name}.facade.rest.exception`
+- Class name: `KafkaExceptionHandler` (fixed)
 
 ```java
 package com.poscodx.sample.{service name}.facade.rest.exception;
@@ -90,11 +96,11 @@ public class KafkaExceptionHandler {
 ```
 
 ### 3. TimeEventListener.java
-시간 기반 이벤트를 처리하는 리스너 클래스입니다.
+Listener class that handles time-based events.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{서비스명}.facade.event`
-- 클래스명: `TimeEventListener` (고정)
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{service name}.facade.event`
+- Class name: `TimeEventListener` (fixed)
 
 ```java
 package com.poscodx.sample.{service name}.facade.event;
@@ -127,11 +133,11 @@ public class TimeEventListener
 ```
 
 ### 4. topic_channelListener.java
-토픽 채널 이벤트를 처리하는 리스너 클래스입니다.
+Listener class that handles topic channel events.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{서비스명}.facade.event`
-- 클래스명: `topic_channelListener` (고정)
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{service name}.facade.event`
+- Class name: `topic_channelListener` (fixed)
 
 ```java
 package com.poscodx.sample.{service name}.facade.event;
@@ -163,20 +169,20 @@ public class topic_channelListener
 }
 ```
 
-## 유동 생성 파일들 규칙
+## Dynamic Generation Files Rules
 
-DDD 마이크로서비스의 성격에 따라 boundedContext의 Aggregate별 생성될 파일들이며, 해당 메타데이터를 참고하여 유동적으로 세부 코드, 경로가 변경되어야한다.
+Files to be generated for each Aggregate of boundedContext according to the nature of DDD microservices, and detailed code and paths should be changed dynamically by referencing the metadata.
 
-### 1. {entityName}Resource.java (Store CRUD 컨트롤러)
-도메인 엔티티에 대한 기본 CRUD REST API를 제공하는 컨트롤러입니다.
+### 1. {entityName}Resource.java (Store CRUD Controller)
+Controller that provides basic CRUD REST API for domain entities.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{프로젝트명}.facade.rest.store`
-- 클래스명: `{entityName}Resource` (첫 글자 대문자)
-- REST 매핑: `/{entity-name}` (kebab-case)
-- 기본 CRUD 메서드: findAll, find, register, modify, remove
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{project name}.facade.rest.store`
+- Class name: `{entityName}Resource` (first letter uppercase)
+- REST mapping: `/{entity-name}` (kebab-case)
+- Basic CRUD methods: findAll, find, register, modify, remove
 
-**예시 코드:**
+**Example Code:**
 ```java
 package com.poscodx.sample.{service name}.facade.rest.store;
 
@@ -230,16 +236,16 @@ public class projectResource {
 }
 ```
 
-### 2. {entityName}ActionResource.java (Feature Action 컨트롤러)
-비즈니스 액션을 처리하는 REST API 컨트롤러입니다.
+### 2. {entityName}ActionResource.java (Feature Action Controller)
+REST API controller that handles business actions.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{프로젝트명}.facade.rest.feature`
-- 클래스명: `{entityName}ActionResource` (첫 글자 대문자)
-- REST 매핑: `/{entity-name}-action` (kebab-case)
-- Action 컴포넌트 의존성 주입
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{project name}.facade.rest.feature`
+- Class name: `{entityName}ActionResource` (first letter uppercase)
+- REST mapping: `/{entity-name}-action` (kebab-case)
+- Action component dependency injection
 
-**예시 코드:**
+**Example Code:**
 ```java
 package com.poscodx.sample.{service name}.facade.rest.feature;
 
@@ -279,16 +285,16 @@ public class projectActionResource {
 }
 ```
 
-### 3. {entityName}FlowResource.java (Feature Flow 컨트롤러)
-비즈니스 플로우를 처리하는 REST API 컨트롤러입니다.
+### 3. {entityName}FlowResource.java (Feature Flow Controller)
+REST API controller that handles business flows.
 
-**생성 규칙:**
-- 패키지명: `com.poscodx.sample.{프로젝트명}.facade.rest.feature`
-- 클래스명: `{entityName}FlowResource` (첫 글자 대문자)
-- REST 매핑: `/{entity-name}-flow` (kebab-case)
-- Flow 컴포넌트 의존성 주입
+**Generation Rules:**
+- Package name: `com.poscodx.sample.{project name}.facade.rest.feature`
+- Class name: `{entityName}FlowResource` (first letter uppercase)
+- REST mapping: `/{entity-name}-flow` (kebab-case)
+- Flow component dependency injection
 
-**예시 코드:**
+**Example Code:**
 ```java
 package com.poscodx.sample.{service name}.facade.rest.feature;
 
@@ -329,16 +335,16 @@ public class projectFlowResource {
 }
 ```
 
-## 생성 지침
+## Generation Guidelines
 
-1. **고정 생성 파일들**은 위에 명시된 내용을 기반으로 서비스명에 맞게 생성합니다.
-2. **유동 생성 파일들**은 도메인 엔티티 메타데이터를 기반으로 동적으로 생성합니다.
-3. **패키지 구조**는 `com.poscodx.sample.{service name}` 형태로 통일합니다.
-4. **Exception Handler**는 `KafkaExceptionHandler`로 고정합니다.
-5. **Event 리스너**는 Kafka 관련 이벤트 처리를 위해 고정 생성합니다:
+1. **Fixed generation files** are generated based on the content specified above according to the service name.
+2. **Dynamic generation files** are generated dynamically based on domain entity metadata.
+3. **Package structure** is unified in the form of `com.poscodx.sample.{service name}`.
+4. **Exception Handler** is fixed as `KafkaExceptionHandler`.
+5. **Event listeners** are generated fixed for Kafka-related event handling:
    - TimeEventListener.java
    - topic_channelListener.java
-6. REST 매핑 경로는 엔티티명을 kebab-case로 변환하여 사용합니다.
-7. CRUD 컨트롤러는 기본적인 5가지 메서드(findAll, find, register, modify, remove)를 포함합니다.
-8. Feature 컨트롤러는 해당하는 Action/Flow 컴포넌트에 의존하며, 비즈니스 로직 구현을 위한 TODO 주석을 포함합니다.
-9. **DDD 마이크로서비스 기반 변경사항**: 파일의 경로와 세부 내용은 DDD 마이크로서비스에 의거하여 변경되어야 하는 사항들에 대해 Metadata를 참조하여 만들어야 합니다.
+6. REST mapping paths use entity names converted to kebab-case.
+7. CRUD controllers include 5 basic methods (findAll, find, register, modify, remove).
+8. Feature controllers depend on corresponding Action/Flow components and include TODO comments for business logic implementation.
+9. **DDD microservice-based changes**: File paths and detailed content should be created by referencing metadata for changes that need to be made based on DDD microservices.
