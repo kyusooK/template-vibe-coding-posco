@@ -1,8 +1,7 @@
 ---
+description: Essential reference file for generating pom files located at the root and within each module.
 alwaysApply: false
 ---
-
-
 When configuring service-specific packages, a total of 5 pom.xml files must be generated, and each pom file must be generated as follows.
 
 The {service name} notation represents the value corresponding to boundedContext.nameCamelCase in the metadata. ex) order, delivery, product ...
