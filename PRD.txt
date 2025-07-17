@@ -1,5 +1,5 @@
 forEach: Aggregate
-path: {{#boundedContext}}{{name}}{{/boundedContext}}/{{name}}
+path: {{name}}
 ---
 Please implement DDD-based microservice architecture code referring to `@generation-rules`. It must be generated based on the metadata provided below:
 
