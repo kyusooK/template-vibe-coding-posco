@@ -1,13 +1,16 @@
 ---
+description: When proceeding with code generation according to each Aggregate's PRD, this file must be read first to understand the code generation sequence and mandatory rules that must be followed.
 alwaysApply: false
 ---
-
 Generate the Spring Boot project according to the following requirements:
 
 Project Generation Workflow
 The project MUST be generated in the following sequential order as specified in the prompt:
 
-Package Structure Creation -> pom.xml Generation -> Store Module Files Creation -> Feature Module Files Creation -> Facade Module Files Creation -> Boot Module Files Creation -> Inter-module Dependencies Configuration -> Global Error Resolution
+Service Folder Creation -> Package Structure Creation -> pom.xml Generation -> Store Module Files Creation -> Feature Module Files Creation -> Facade Module Files Creation -> Boot Module Files Creation -> Inter-module Dependencies Configuration -> Global Error Resolution
+
+Service Folder Creation Rule
+Create a folder with the service name at the root path (all subsequent package structures and files will be created under this folder)
 
 Java File Generation Sequence
 When creating *.java files, generate code sequentially following the requirements below:
